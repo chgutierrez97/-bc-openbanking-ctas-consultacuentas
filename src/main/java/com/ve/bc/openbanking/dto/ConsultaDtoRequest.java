@@ -20,7 +20,7 @@ import javax.validation.constraints.Size;
 public class ConsultaDtoRequest {
 
 	
-	private Integer codMoneda;
+	private String moneda;
 	private String numCuenta;
 	private String ip;
 	private String ceduRif;

@@ -1,7 +1,7 @@
 
 spring:
   application:
-    name: bc-openbanking-gral-servicios 
+    name: bc-openbanking-ctas-consultacuentas 
   cloud:
     config:
       enabled: true
