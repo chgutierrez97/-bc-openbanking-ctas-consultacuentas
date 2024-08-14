@@ -9,9 +9,9 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.ve.bc.openbanking</groupId>
-	<artifactId>apiOpenbankingCtasConsulta</artifactId>
+	<artifactId>bcOpenbankingCtasConsultacuentas</artifactId>
 	<version>1.0.0</version>
-	<name>apiOpenbankingCtasConsulta</name>
+	<name>bcOpenbankingCtasConsultacuentas</name>
 	<description>Servicio de consulta de Datos de Cuentas </description>
 	<properties>
 		<java.version>1.8</java.version>

@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
@@ -50,9 +52,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/consultaCuentas")
+@RequestMapping("/ctasconsultacuentas")
 
-@Tag(name = "Validacion Servicios")
+@Tag(name = "Consulta Cuentas")
 public class ConsultaCtasController {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConsultaCtasController.class);
@@ -104,11 +106,12 @@ public class ConsultaCtasController {
 					})
 	})
 	@GetMapping
+	@ResponseBody
 	public ResponseEntity<?> getCosultaServicios(@RequestHeader(value = "X-Request-IP", required = true) String ip,@RequestHeader(value = "X-ClienteRIF", required = true) String clienteRif,@RequestHeader(value = "X-Cliente-HasH", required = true) String clienteHash,@RequestHeader(value = "X-Request-Id", required = false) String requestId,
-			HttpServletRequest request, HttpServletResponse response){
+			@RequestParam(required = false) String moneda, HttpServletResponse response){
 		
-		String moneda = request.getParameter("moneda");
 		
+		ResponseEntity<?> valiServiciosResponse = null;
 		if (requestId == null || requestId == ""){
 			requestId = utils.generarCodigoTracerId();
 		}
@@ -121,10 +124,25 @@ public class ConsultaCtasController {
 
 		LOGGER.info("Start ConsultaGralServiciosController : getCosultaServicios  RequestId :" + requestId);
 		LOGGER.info("ConsultaGralContratosController Direccion IP : " + ip);
-
 		
-		
-		ResponseEntity<?> valiServiciosResponse = servicioServices.getConsulta(consultaDtoRequest, requestId);		
+		if(getValidaContrato(consultaDtoRequest,requestId,ip)) {
+			
+			if(getValidaServices(consultaDtoRequest,requestId,ip)){
+				valiServiciosResponse =  servicioServices.getConsulta(consultaDtoRequest, requestId);	
+			}else {
+				ErrorResponse errorDto = new ErrorResponse();
+				errorDto.setCodigoError("180233");
+				errorDto.setDescripcionError("Falla validando la afiliacion de Servicio");	
+				LOGGER.error(" End  ConsultaGralServiciosController falla validando el servicio  : getCosultaServicios  RequestId :" + requestId);
+	            return new ResponseEntity<ErrorResponse>(errorDto, HttpStatus.CONFLICT);
+			}			
+		}else {
+			ErrorResponse errorDto = new ErrorResponse();
+			errorDto.setCodigoError("180234");
+			errorDto.setDescripcionError("Falla validando la afiliacion del Contrato");
+			LOGGER.error(" End  ConsultaGralServiciosController falla validando el contrato : getCosultaServicios  RequestId :" + requestId);
+            return new ResponseEntity<ErrorResponse>(errorDto, HttpStatus.CONFLICT);		
+		}	
 		LOGGER.info(" End  ConsultaGralServiciosController : getCosultaServicios  RequestId :" + requestId);
 		response.setHeader("X-Request-Id", requestId);
 		return valiServiciosResponse;
@@ -163,14 +181,13 @@ public class ConsultaCtasController {
 	public ResponseEntity<?> getCosultaServicios3(@RequestHeader(value = "X-Request-IP", required = true) String ip,@RequestHeader(value = "X-ClienteRIF", required = true) String clienteRif,@RequestHeader(value = "X-Cliente-HasH", required = true) String clienteHash,@RequestHeader(value = "X-Request-Id", required = false) String requestId,
 			@PathVariable(name = "numeroCuenta") String numeroCuenta, HttpServletResponse response){
 		
+		
 		if (requestId == null || requestId == ""){
 			requestId = utils.generarCodigoTracerId();
 		}
-		ResponseEntity<?> valiServiciosResponse = null;
-		
-		
-		
-		
+		LOGGER.info("Start ConsultaGralServiciosController : getCosultaServicios  RequestId :" + requestId);
+		LOGGER.info("ConsultaGralContratosController Direccion IP : " + ip);
+		ResponseEntity<?> valiServiciosResponse = null;		
 		ConsultaDtoRequest consultaDtoRequest = new ConsultaDtoRequest(); 
 		consultaDtoRequest.setMoneda("");
 		consultaDtoRequest.setCeduRif(clienteRif);
@@ -178,18 +195,26 @@ public class ConsultaCtasController {
 		consultaDtoRequest.setIp(ip);
 		consultaDtoRequest.setNumCuenta(numeroCuenta);
 	
-		getValidaServices(consultaDtoRequest,requestId,ip);
+		
 		if(getValidaContrato(consultaDtoRequest,requestId,ip)) {
 			
+			if(getValidaServices(consultaDtoRequest,requestId,ip)){
+				valiServiciosResponse = servicioServices.getConsulta(consultaDtoRequest, requestId);
+			}else {
+				ErrorResponse errorDto = new ErrorResponse();
+				errorDto.setCodigoError("180233");
+				errorDto.setDescripcionError("Falla validando la afiliacion de Servicio");	
+				LOGGER.error(" End  ConsultaGralServiciosController falla validando el servicio  : getCosultaServicios  RequestId :" + requestId);
+	            return new ResponseEntity<ErrorResponse>(errorDto, HttpStatus.CONFLICT);
+			}			
 		}else {
-			
-			
+			ErrorResponse errorDto = new ErrorResponse();
+			errorDto.setCodigoError("180234");
+			errorDto.setDescripcionError("Falla validando la afiliacion del Contrato");
+			LOGGER.error(" End  ConsultaGralServiciosController falla validando el contrato : getCosultaServicios  RequestId :" + requestId);
+            return new ResponseEntity<ErrorResponse>(errorDto, HttpStatus.CONFLICT);		
 		}
-		
-		
-		LOGGER.info("Start ConsultaGralServiciosController : getCosultaServicios  RequestId :" + requestId);
-		LOGGER.info("ConsultaGralContratosController Direccion IP : " + ip);
-		 valiServiciosResponse = servicioServices.getConsulta(consultaDtoRequest, requestId);		
+	
 		LOGGER.info(" End  ConsultaGralServiciosController : getCosultaServicios  RequestId :" + requestId);
 		response.setHeader("X-Request-Id", requestId);
 		return valiServiciosResponse;
@@ -223,15 +248,16 @@ public class ConsultaCtasController {
 			LOGGER.error("End ConsultaCtasController : getValidaContrato  TracerId :" + requestId +" causa >> "+ e.getMessage());
 		}catch (Exception e) {
 			flag = Boolean.FALSE;
+			String a = e.getMessage();
+			a.split(":");
 			LOGGER.error("End ConsultaCtasController : getValidaContrato  TracerId :" + requestId +" causa >> "+ e.getMessage());
 			
 		}
-		return flag;
 	
+		return flag;
     }
 	
-	
-	
+		
 	public Boolean getValidaServices(ConsultaDtoRequest consultaDtoRequest , String requestId, String ip)  {
 		Boolean flag = Boolean.TRUE;
 	     RestTemplate template = new RestTemplate();
