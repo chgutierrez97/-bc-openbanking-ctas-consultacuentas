@@ -77,6 +77,9 @@ public class ConsultaCtasController {
 	@Value("${api.servi.name}")
     String serviName;	
 	
+	String errorContrato = "";
+	String errorServicio = "";
+	
 	@Operation(summary = "${api.doc.summary.servi.contr}", description = "${api.doc.description.servi.contr}")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "OK",
@@ -131,16 +134,30 @@ public class ConsultaCtasController {
 				valiServiciosResponse =  servicioServices.getConsulta(consultaDtoRequest, requestId);	
 			}else {
 				ErrorResponse errorDto = new ErrorResponse();
-				errorDto.setCodigoError("180233");
-				errorDto.setDescripcionError("Falla validando la afiliacion de Servicio");	
-				LOGGER.error(" End  ConsultaGralServiciosController falla validando el servicio  : getCosultaServicios  RequestId :" + requestId);
+				if(errorServicio.equals("")) {
+					errorDto.setCodigoError("180233");
+					errorDto.setDescripcionError("Falla validando la afiliacion de Servicio");	
+					LOGGER.error(" End  ConsultaGralServiciosController falla validando el servicio  : getCosultaServicios  RequestId :" + requestId);
+				}else {
+					errorDto = decoError(errorServicio);
+					LOGGER.error(" End  ConsultaGralServiciosController falla validando el servicio  : getCosultaServicios  RequestId :" + requestId);	
+				}
+
 	            return new ResponseEntity<ErrorResponse>(errorDto, HttpStatus.CONFLICT);
 			}			
 		}else {
 			ErrorResponse errorDto = new ErrorResponse();
-			errorDto.setCodigoError("180234");
-			errorDto.setDescripcionError("Falla validando la afiliacion del Contrato");
-			LOGGER.error(" End  ConsultaGralServiciosController falla validando el contrato : getCosultaServicios  RequestId :" + requestId);
+			if(errorContrato.equals("")) {
+				errorDto.setCodigoError("180234");
+				errorDto.setDescripcionError("Falla validando la afiliacion del Contrato");
+				LOGGER.error(" End  ConsultaGralServiciosController falla validando el contrato : getCosultaServicios  RequestId :" + requestId);
+				
+			}else {
+				errorDto = decoError(errorContrato);
+				LOGGER.error(" End  ConsultaGralServiciosController falla validando el contrato : getCosultaServicios  RequestId :" + requestId);
+			}
+			
+			
             return new ResponseEntity<ErrorResponse>(errorDto, HttpStatus.CONFLICT);		
 		}	
 		LOGGER.info(" End  ConsultaGralServiciosController : getCosultaServicios  RequestId :" + requestId);
@@ -180,7 +197,8 @@ public class ConsultaCtasController {
 	@GetMapping("/{numeroCuenta}")
 	public ResponseEntity<?> getCosultaServicios3(@RequestHeader(value = "X-Request-IP", required = true) String ip,@RequestHeader(value = "X-ClienteRIF", required = true) String clienteRif,@RequestHeader(value = "X-Cliente-HasH", required = true) String clienteHash,@RequestHeader(value = "X-Request-Id", required = false) String requestId,
 			@PathVariable(name = "numeroCuenta") String numeroCuenta, HttpServletResponse response){
-		
+		errorContrato = "";
+		errorServicio = "";
 		
 		if (requestId == null || requestId == ""){
 			requestId = utils.generarCodigoTracerId();
@@ -202,16 +220,30 @@ public class ConsultaCtasController {
 				valiServiciosResponse = servicioServices.getConsulta(consultaDtoRequest, requestId);
 			}else {
 				ErrorResponse errorDto = new ErrorResponse();
-				errorDto.setCodigoError("180233");
-				errorDto.setDescripcionError("Falla validando la afiliacion de Servicio");	
-				LOGGER.error(" End  ConsultaGralServiciosController falla validando el servicio  : getCosultaServicios  RequestId :" + requestId);
+				if(errorServicio.equals("")) {
+					errorDto.setCodigoError("180233");
+					errorDto.setDescripcionError("Falla validando la afiliacion de Servicio");	
+					LOGGER.error(" End  ConsultaGralServiciosController falla validando el servicio  : getCosultaServicios  RequestId :" + requestId);
+		            	
+				}else {
+					errorDto = decoError(errorServicio);
+					LOGGER.error(" End  ConsultaGralServiciosController falla validando el servicio  : getCosultaServicios  RequestId :" + requestId);
+				}
+	
+				
 	            return new ResponseEntity<ErrorResponse>(errorDto, HttpStatus.CONFLICT);
 			}			
 		}else {
 			ErrorResponse errorDto = new ErrorResponse();
-			errorDto.setCodigoError("180234");
-			errorDto.setDescripcionError("Falla validando la afiliacion del Contrato");
-			LOGGER.error(" End  ConsultaGralServiciosController falla validando el contrato : getCosultaServicios  RequestId :" + requestId);
+			if(errorContrato.equals("")) {
+				errorDto.setCodigoError("180234");
+				errorDto.setDescripcionError("Falla validando la afiliacion del Contrato");
+				LOGGER.error(" End  ConsultaGralServiciosController falla validando el contrato : getCosultaServicios  RequestId :" + requestId);
+			}else {
+				errorDto = decoError(errorContrato);
+				LOGGER.error(" End  ConsultaGralServiciosController falla validando el contrato : getCosultaServicios  RequestId :" + requestId);
+			}
+			
             return new ResponseEntity<ErrorResponse>(errorDto, HttpStatus.CONFLICT);		
 		}
 	
@@ -223,6 +255,7 @@ public class ConsultaCtasController {
 	
 	
 	public Boolean getValidaContrato(ConsultaDtoRequest consultaDtoRequest, String requestId, String ip)  {
+		errorContrato = "";
 		Boolean flag = Boolean.TRUE;
 	     RestTemplate template = new RestTemplate();
 		LOGGER.info("Start ConsultaCtasController : getValidaContrato  RequestId :" + requestId);
@@ -248,8 +281,7 @@ public class ConsultaCtasController {
 			LOGGER.error("End ConsultaCtasController : getValidaContrato  TracerId :" + requestId +" causa >> "+ e.getMessage());
 		}catch (Exception e) {
 			flag = Boolean.FALSE;
-			String a = e.getMessage();
-			a.split(":");
+			errorContrato = e.getMessage();
 			LOGGER.error("End ConsultaCtasController : getValidaContrato  TracerId :" + requestId +" causa >> "+ e.getMessage());
 			
 		}
@@ -260,7 +292,8 @@ public class ConsultaCtasController {
 		
 	public Boolean getValidaServices(ConsultaDtoRequest consultaDtoRequest , String requestId, String ip)  {
 		Boolean flag = Boolean.TRUE;
-	     RestTemplate template = new RestTemplate();
+		errorServicio = "";
+	    RestTemplate template = new RestTemplate();
 		LOGGER.info("Start ConsultaCtasController : getValidaServices  RequestId :" + requestId);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -279,20 +312,33 @@ public class ConsultaCtasController {
 			HttpEntity<ServicioRequest> httpEntity = new HttpEntity<>(servicioRequest, headers);			
 			ContratoResponse resp = template.postForObject(uri, httpEntity, ContratoResponse.class);
 			LOGGER.info("End ConsultaCtasController : getValidaServices  RequestId :" + requestId);
-			return flag;
-			
+			return flag;			
 		} catch (URISyntaxException e) {
 			flag = Boolean.FALSE;
-			LOGGER.error("End ConsultaCtasController : getValidaServices  TracerId :" + requestId +" causa >> "+ e.getMessage());
-		
+			LOGGER.error("End ConsultaCtasController : getValidaServices  TracerId :" + requestId +" causa >> "+ e.getMessage());		
 		}catch (Exception e) {
+			errorServicio = e.getMessage();
 			flag = Boolean.FALSE;
-			LOGGER.error("End ConsultaCtasController : getValidaServices  TracerId :" + requestId +" causa >> "+ e.getMessage());
-			
+			LOGGER.error("End ConsultaCtasController : getValidaServices  TracerId :" + requestId +" causa >> "+ e.getMessage());			
 		}
 		return flag;
-	
     }
+	
+	 public ErrorResponse decoError(String mensaje) {
+		 ErrorResponse errorDto = new ErrorResponse();
+		 String codigo = "", descripcion="";
+			
+			if(mensaje.contains("409 Conflict")) {
+				codigo = mensaje.split(":")[2].split(",")[0].replaceAll("\"", "");
+				errorDto.setCodigoError(codigo);
+				descripcion = mensaje.split(":")[3].replaceAll("[{}]", "").replaceAll("\"", "");
+				errorDto.setDescripcionError(descripcion);
+				System.err.println("codi "+codigo+" descrp: "+descripcion);
+			}
+			return errorDto;
+			
+			
+	 }
 	
 	
 
