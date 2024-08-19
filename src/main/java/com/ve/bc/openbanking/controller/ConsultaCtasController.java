@@ -68,6 +68,8 @@ public class ConsultaCtasController {
 	@Autowired
 	RestTemplate restTemplate;
 	
+
+	
 	@Value("${url.servi.contrato}")
     String UrlContrato;
 
@@ -77,10 +79,12 @@ public class ConsultaCtasController {
 	@Value("${api.servi.name}")
     String serviName;	
 	
+	
+	
 	String errorContrato = "";
 	String errorServicio = "";
 	
-	@Operation(summary = "${api.doc.summary.servi.contr}", description = "${api.doc.description.servi.contr}")
+	//@Operation(summary = "${api.doc.summary.servi.contr}", description = "${api.doc.description.servi.contr}")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "OK",
 					content = {
@@ -110,7 +114,7 @@ public class ConsultaCtasController {
 	})
 	@GetMapping
 	@ResponseBody
-	public ResponseEntity<?> getCosultaServicios(@RequestHeader(value = "X-Request-IP", required = true) String ip,@RequestHeader(value = "X-ClienteRIF", required = true) String clienteRif,@RequestHeader(value = "X-Cliente-HasH", required = true) String clienteHash,@RequestHeader(value = "X-Request-Id", required = false) String requestId,
+	public ResponseEntity<?> getConsultaServicios(@RequestHeader(value = "X-Request-IP", required = true) String ip,@RequestHeader(value = "X-ClienteRIF", required = true) String clienteRif,@RequestHeader(value = "X-Cliente-Hash", required = true) String clienteHash,@RequestHeader(value = "X-Request-Id", required = false) String requestId,
 			@RequestParam(required = false) String moneda, HttpServletResponse response){
 		
 		
@@ -125,7 +129,7 @@ public class ConsultaCtasController {
 		consultaDtoRequest.setIp(ip);
 		consultaDtoRequest.setNumCuenta("");
 
-		LOGGER.info("Start ConsultaGralServiciosController : getCosultaServicios  RequestId :" + requestId);
+		LOGGER.info("Start ConsultaGralServiciosController : getConsultaServicios  RequestId :" + requestId);
 		LOGGER.info("ConsultaGralContratosController Direccion IP : " + ip);
 		
 		if(getValidaContrato(consultaDtoRequest,requestId,ip)) {
@@ -134,33 +138,33 @@ public class ConsultaCtasController {
 				valiServiciosResponse =  servicioServices.getConsulta(consultaDtoRequest, requestId);	
 			}else {
 				ErrorResponse errorDto = new ErrorResponse();
-				if(errorServicio.equals("")) {
+				if(errorServicio.equals("") || !(errorServicio.contains("409"))) {
 					errorDto.setCodigoError("180233");
 					errorDto.setDescripcionError("Falla validando la afiliacion de Servicio");	
-					LOGGER.error(" End  ConsultaGralServiciosController falla validando el servicio  : getCosultaServicios  RequestId :" + requestId);
+					LOGGER.error(" End  ConsultaGralServiciosController falla validando el servicio  : getConsultaServicios 1  RequestId :" + requestId);
 				}else {
-					errorDto = decoError(errorServicio);
-					LOGGER.error(" End  ConsultaGralServiciosController falla validando el servicio  : getCosultaServicios  RequestId :" + requestId);	
+					errorDto = decoError(errorServicio, true);
+					LOGGER.error(" End  ConsultaGralServiciosController falla validando el servicio  : getConsultaServicios  2 RequestId :" + requestId);	
 				}
-
+				response.setHeader("X-Request-Id", requestId);
 	            return new ResponseEntity<ErrorResponse>(errorDto, HttpStatus.CONFLICT);
 			}			
 		}else {
 			ErrorResponse errorDto = new ErrorResponse();
-			if(errorContrato.equals("")) {
+			if(errorContrato.equals("") || !(errorContrato.contains("409"))) {
 				errorDto.setCodigoError("180234");
 				errorDto.setDescripcionError("Falla validando la afiliacion del Contrato");
-				LOGGER.error(" End  ConsultaGralServiciosController falla validando el contrato : getCosultaServicios  RequestId :" + requestId);
+				LOGGER.error(" End  ConsultaGralServiciosController falla validando el contrato : getConsultaServicios  RequestId :" + requestId);
 				
 			}else {
-				errorDto = decoError(errorContrato);
-				LOGGER.error(" End  ConsultaGralServiciosController falla validando el contrato : getCosultaServicios  RequestId :" + requestId);
+				errorDto = decoError(errorContrato,false);
+				LOGGER.error(" End  ConsultaGralServiciosController falla validando el contrato : getConsultaServicios  RequestId :" + requestId);
 			}
 			
-			
+			response.setHeader("X-Request-Id", requestId);
             return new ResponseEntity<ErrorResponse>(errorDto, HttpStatus.CONFLICT);		
 		}	
-		LOGGER.info(" End  ConsultaGralServiciosController : getCosultaServicios  RequestId :" + requestId);
+		LOGGER.info(" End  ConsultaGralServiciosController : getConsultaServicios  RequestId :" + requestId);
 		response.setHeader("X-Request-Id", requestId);
 		return valiServiciosResponse;
 		
@@ -195,7 +199,7 @@ public class ConsultaCtasController {
 					})
 	})
 	@GetMapping("/{numeroCuenta}")
-	public ResponseEntity<?> getCosultaServicios3(@RequestHeader(value = "X-Request-IP", required = true) String ip,@RequestHeader(value = "X-ClienteRIF", required = true) String clienteRif,@RequestHeader(value = "X-Cliente-HasH", required = true) String clienteHash,@RequestHeader(value = "X-Request-Id", required = false) String requestId,
+	public ResponseEntity<?> getConsultaServicios3(@RequestHeader(value = "X-Request-IP", required = true) String ip,@RequestHeader(value = "X-ClienteRIF", required = true) String clienteRif,@RequestHeader(value = "X-Cliente-Hash", required = true) String clienteHash,@RequestHeader(value = "X-Request-Id", required = false) String requestId,
 			@PathVariable(name = "numeroCuenta") String numeroCuenta, HttpServletResponse response){
 		errorContrato = "";
 		errorServicio = "";
@@ -203,7 +207,7 @@ public class ConsultaCtasController {
 		if (requestId == null || requestId == ""){
 			requestId = utils.generarCodigoTracerId();
 		}
-		LOGGER.info("Start ConsultaGralServiciosController : getCosultaServicios  RequestId :" + requestId);
+		LOGGER.info("Start ConsultaGralServiciosController : getConsultaServicios  RequestId :" + requestId);
 		LOGGER.info("ConsultaGralContratosController Direccion IP : " + ip);
 		ResponseEntity<?> valiServiciosResponse = null;		
 		ConsultaDtoRequest consultaDtoRequest = new ConsultaDtoRequest(); 
@@ -220,34 +224,34 @@ public class ConsultaCtasController {
 				valiServiciosResponse = servicioServices.getConsulta(consultaDtoRequest, requestId);
 			}else {
 				ErrorResponse errorDto = new ErrorResponse();
-				if(errorServicio.equals("")) {
-					errorDto.setCodigoError("180233");
+				LOGGER.error("errorContrato  "+errorServicio);
+				if(errorServicio.equals("") || !(errorServicio.contains("409"))) {
+					errorDto.setCodigoError("180234");
 					errorDto.setDescripcionError("Falla validando la afiliacion de Servicio");	
-					LOGGER.error(" End  ConsultaGralServiciosController falla validando el servicio  : getCosultaServicios  RequestId :" + requestId);
+					LOGGER.error(" End  ConsultaGralServiciosController falla validando el servicio  : getConsultaServicios  RequestId :" + requestId);
 		            	
 				}else {
-					errorDto = decoError(errorServicio);
-					LOGGER.error(" End  ConsultaGralServiciosController falla validando el servicio  : getCosultaServicios  RequestId :" + requestId);
+					errorDto = decoError(errorServicio,true);					
+					LOGGER.error(" End  ConsultaGralServiciosController falla validando el servicio  : getConsultaServicios  RequestId :" + requestId);
 				}
-	
-				
+				response.setHeader("X-Request-Id", requestId);
 	            return new ResponseEntity<ErrorResponse>(errorDto, HttpStatus.CONFLICT);
 			}			
 		}else {
 			ErrorResponse errorDto = new ErrorResponse();
-			if(errorContrato.equals("")) {
+			if(errorContrato.equals("") || !(errorContrato.contains("409"))) {
 				errorDto.setCodigoError("180234");
 				errorDto.setDescripcionError("Falla validando la afiliacion del Contrato");
-				LOGGER.error(" End  ConsultaGralServiciosController falla validando el contrato : getCosultaServicios  RequestId :" + requestId);
+				LOGGER.error(" End  ConsultaGralServiciosController falla validando el contrato : getConsultaServicios  RequestId :" + requestId);
 			}else {
-				errorDto = decoError(errorContrato);
-				LOGGER.error(" End  ConsultaGralServiciosController falla validando el contrato : getCosultaServicios  RequestId :" + requestId);
+				errorDto = decoError(errorContrato,false);
+				LOGGER.error(" End  ConsultaGralServiciosController falla validando el contrato : getConsultaServicios  RequestId :" + requestId);
 			}
-			
+			response.setHeader("X-Request-Id", requestId);
             return new ResponseEntity<ErrorResponse>(errorDto, HttpStatus.CONFLICT);		
 		}
 	
-		LOGGER.info(" End  ConsultaGralServiciosController : getCosultaServicios  RequestId :" + requestId);
+		LOGGER.info(" End  ConsultaGralServiciosController : getConsultaServicios  RequestId :" + requestId);
 		response.setHeader("X-Request-Id", requestId);
 		return valiServiciosResponse;
 		
@@ -271,7 +275,7 @@ public class ConsultaCtasController {
 			ContratoRequest contratoRequest = new ContratoRequest();
 			contratoRequest.setClienteHash(consultaDtoRequest.getHash());
 			contratoRequest.setClienteRIF(consultaDtoRequest.getCeduRif());
-			HttpEntity<ContratoRequest> httpEntity = new HttpEntity<>(contratoRequest, headers);			
+						HttpEntity<ContratoRequest> httpEntity = new HttpEntity<>(contratoRequest, headers);			
 			ContratoResponse resp = template.postForObject(uri, httpEntity, ContratoResponse.class);			
 			LOGGER.info("End ConsultaCtasController : getValidaContrato  RequestId :" + requestId);
 			return flag;
@@ -324,11 +328,11 @@ public class ConsultaCtasController {
 		return flag;
     }
 	
-	 public ErrorResponse decoError(String mensaje) {
+	 public ErrorResponse decoError(String mensaje, Boolean servicio) {
 		 ErrorResponse errorDto = new ErrorResponse();
 		 String codigo = "", descripcion="";
 			
-			if(mensaje.contains("409 Conflict")) {
+			if(mensaje.contains("409")) {
 				codigo = mensaje.split(":")[2].split(",")[0].replaceAll("\"", "");
 				errorDto.setCodigoError(codigo);
 				descripcion = mensaje.split(":")[3].replaceAll("[{}]", "").replaceAll("\"", "");
