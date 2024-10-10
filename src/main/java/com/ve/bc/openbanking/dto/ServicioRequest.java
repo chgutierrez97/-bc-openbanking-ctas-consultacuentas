@@ -18,6 +18,7 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ServicioRequest {
+	private String ip;
 	private String servicio;	
 	private String clienteHash;
 	private String clienteRIF;	

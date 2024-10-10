@@ -3,6 +3,7 @@ package com.ve.bc.openbanking.controller;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,6 +34,8 @@ import com.ve.bc.openbanking.dto.ServicioResponse;
 import com.ve.bc.openbanking.feignclient.AfiliacionContratosFeignClient;
 import com.ve.bc.openbanking.feignclient.AfiliacionServiciosFeignClient;
 import com.ve.bc.openbanking.dto.ServicioRequest;
+import com.ve.bc.openbanking.dto.ConsultaCtaByNumRequest;
+import com.ve.bc.openbanking.dto.ConsultaCtasByMonedaRequest;
 import com.ve.bc.openbanking.dto.ConsultaCtasRequest;
 import com.ve.bc.openbanking.dto.ConsultaDatosCtaRequest;
 import com.ve.bc.openbanking.dto.ConsultaDtoRequest;
@@ -52,7 +55,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/ctasconsultacuentas")
+@RequestMapping("/ctasConsultaCuentas")
 
 @Tag(name = "Consulta Cuentas")
 public class ConsultaCtasController {
@@ -86,11 +89,15 @@ public class ConsultaCtasController {
 	
 	//@Operation(summary = "${api.doc.summary.servi.contr}", description = "${api.doc.description.servi.contr}")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "OK",
-					content = {
-							@Content(mediaType = "application/json",
-							schema = @Schema(implementation = ServicioResponse.class)		)					
-							}),
+			
+			@ApiResponse(
+					  responseCode = "200",
+					  content = @Content(
+					  array = 
+					  @io.swagger.v3.oas.annotations.media.ArraySchema(
+					      schema = @Schema(implementation = ResponseConsutaCtas.class))), 
+					      description = "Ok"),
+			
 			@ApiResponse(responseCode = "400", description = "Bad Request",
 					content = {
 							@Content(mediaType = "application/json",
@@ -112,29 +119,28 @@ public class ConsultaCtasController {
 					schema = @Schema(implementation = ErrorResponse.class)		)					
 					})
 	})
-	@GetMapping
-	@ResponseBody
-	public ResponseEntity<?> getConsultaServicios(@RequestHeader(value = "X-Request-IP", required = true) String ip,@RequestHeader(value = "X-ClienteRIF", required = true) String clienteRif,@RequestHeader(value = "X-Cliente-Hash", required = true) String clienteHash,@RequestHeader(value = "X-Request-Id", required = false) String requestId,
-			@RequestParam(required = false) String moneda, HttpServletResponse response){
+
+	@PostMapping
+	public ResponseEntity<?> getCosultaCuentas(@RequestHeader(value = "X-Request-Id", required = false) String requestId,
+			@Valid @RequestBody ConsultaCtasByMonedaRequest request, HttpServletResponse response){	
 		
-		
+		HttpHeaders headers = new HttpHeaders();
 		ResponseEntity<?> valiServiciosResponse = null;
 		if (requestId == null || requestId == ""){
 			requestId = utils.generarCodigoTracerId();
 		}
 		ConsultaDtoRequest consultaDtoRequest = new ConsultaDtoRequest(); 
-		consultaDtoRequest.setMoneda(moneda);
-		consultaDtoRequest.setCeduRif(clienteRif);
-		consultaDtoRequest.setHash(clienteHash);
-		consultaDtoRequest.setIp(ip);
+		consultaDtoRequest.setMoneda(request.getMoneda().toUpperCase());
+		consultaDtoRequest.setCeduRif(request.getCeduRif());
+		consultaDtoRequest.setHash(request.getHash());
+		consultaDtoRequest.setIp(request.getIp());
 		consultaDtoRequest.setNumCuenta("");
 
 		LOGGER.info("Start ConsultaGralServiciosController : getConsultaServicios  RequestId :" + requestId);
-		LOGGER.info("ConsultaGralContratosController Direccion IP : " + ip);
+		LOGGER.info("ConsultaGralContratosController Direccion IP : " + request.getIp());
 		
-		if(getValidaContrato(consultaDtoRequest,requestId,ip)) {
-			
-			if(getValidaServices(consultaDtoRequest,requestId,ip)){
+		if(getValidaContrato(consultaDtoRequest,requestId,request.getIp())) {			
+			if(getValidaServices(consultaDtoRequest,requestId,request.getIp())){
 				valiServiciosResponse =  servicioServices.getConsulta(consultaDtoRequest, requestId);	
 			}else {
 				ErrorResponse errorDto = new ErrorResponse();
@@ -146,8 +152,8 @@ public class ConsultaCtasController {
 					errorDto = decoError(errorServicio, true);
 					LOGGER.error(" End  ConsultaGralServiciosController falla validando el servicio  : getConsultaServicios  2 RequestId :" + requestId);	
 				}
-				response.setHeader("X-Request-Id", requestId);
-	            return new ResponseEntity<ErrorResponse>(errorDto, HttpStatus.CONFLICT);
+				headers.add("X-Request-Id", requestId);
+	            return new ResponseEntity<ErrorResponse>(errorDto,headers,HttpStatus.CONFLICT);
 			}			
 		}else {
 			ErrorResponse errorDto = new ErrorResponse();
@@ -161,22 +167,26 @@ public class ConsultaCtasController {
 				LOGGER.error(" End  ConsultaGralServiciosController falla validando el contrato : getConsultaServicios  RequestId :" + requestId);
 			}
 			
-			response.setHeader("X-Request-Id", requestId);
-            return new ResponseEntity<ErrorResponse>(errorDto, HttpStatus.CONFLICT);		
+			headers.add("X-Request-Id", requestId);
+            return new ResponseEntity<ErrorResponse>(errorDto,headers, HttpStatus.CONFLICT);		
 		}	
 		LOGGER.info(" End  ConsultaGralServiciosController : getConsultaServicios  RequestId :" + requestId);
-		response.setHeader("X-Request-Id", requestId);
+		
 		return valiServiciosResponse;
 		
 	}
 	
 	
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "OK",
-					content = {
-							@Content(mediaType = "application/json",
-							schema = @Schema(implementation = ServicioResponse.class)		)					
-							}),
+			
+			@ApiResponse(
+					  responseCode = "200",
+					  content = @Content(
+					  array = 
+					  @io.swagger.v3.oas.annotations.media.ArraySchema(
+					      schema = @Schema(implementation = ResponseConsutaCtas.class))), 
+					      description = "Ok"),
+						  
 			@ApiResponse(responseCode = "400", description = "Bad Request",
 					content = {
 							@Content(mediaType = "application/json",
@@ -198,9 +208,11 @@ public class ConsultaCtasController {
 					schema = @Schema(implementation = ErrorResponse.class)		)					
 					})
 	})
-	@GetMapping("/{numeroCuenta}")
-	public ResponseEntity<?> getConsultaServicios3(@RequestHeader(value = "X-Request-IP", required = true) String ip,@RequestHeader(value = "X-ClienteRIF", required = true) String clienteRif,@RequestHeader(value = "X-Cliente-Hash", required = true) String clienteHash,@RequestHeader(value = "X-Request-Id", required = false) String requestId,
-			@PathVariable(name = "numeroCuenta") String numeroCuenta, HttpServletResponse response){
+
+	@PostMapping("/cuenta")
+	public ResponseEntity<?> getConsultaCtaByNum(@RequestHeader(value = "X-Request-Id", required = false) String requestId,
+			@Valid @RequestBody ConsultaCtaByNumRequest request){
+		HttpHeaders headers = new HttpHeaders();
 		errorContrato = "";
 		errorServicio = "";
 		
@@ -208,19 +220,21 @@ public class ConsultaCtasController {
 			requestId = utils.generarCodigoTracerId();
 		}
 		LOGGER.info("Start ConsultaGralServiciosController : getConsultaServicios  RequestId :" + requestId);
-		LOGGER.info("ConsultaGralContratosController Direccion IP : " + ip);
+		LOGGER.info("ConsultaGralContratosController Direccion IP : " + request.getIp());
 		ResponseEntity<?> valiServiciosResponse = null;		
 		ConsultaDtoRequest consultaDtoRequest = new ConsultaDtoRequest(); 
 		consultaDtoRequest.setMoneda("");
-		consultaDtoRequest.setCeduRif(clienteRif);
-		consultaDtoRequest.setHash(clienteHash);
-		consultaDtoRequest.setIp(ip);
-		consultaDtoRequest.setNumCuenta(numeroCuenta);
-	
+		consultaDtoRequest.setCeduRif(request.getCeduRif());
+		consultaDtoRequest.setHash(request.getHash());
+		consultaDtoRequest.setIp(request.getIp());
+		consultaDtoRequest.setNumCuenta(request.getNumCuenta());
 		
-		if(getValidaContrato(consultaDtoRequest,requestId,ip)) {
+		valiServiciosResponse = servicioServices.getConsulta(consultaDtoRequest, requestId);
+		
+	
+		if(getValidaContrato(consultaDtoRequest,requestId,request.getIp())) {
 			
-			if(getValidaServices(consultaDtoRequest,requestId,ip)){
+			if(getValidaServices(consultaDtoRequest,requestId,request.getIp())){
 				valiServiciosResponse = servicioServices.getConsulta(consultaDtoRequest, requestId);
 			}else {
 				ErrorResponse errorDto = new ErrorResponse();
@@ -234,8 +248,8 @@ public class ConsultaCtasController {
 					errorDto = decoError(errorServicio,true);					
 					LOGGER.error(" End  ConsultaGralServiciosController falla validando el servicio  : getConsultaServicios  RequestId :" + requestId);
 				}
-				response.setHeader("X-Request-Id", requestId);
-	            return new ResponseEntity<ErrorResponse>(errorDto, HttpStatus.CONFLICT);
+				headers.add("X-Request-Id", requestId);
+	            return new ResponseEntity<ErrorResponse>(errorDto,headers, HttpStatus.CONFLICT);
 			}			
 		}else {
 			ErrorResponse errorDto = new ErrorResponse();
@@ -247,12 +261,12 @@ public class ConsultaCtasController {
 				errorDto = decoError(errorContrato,false);
 				LOGGER.error(" End  ConsultaGralServiciosController falla validando el contrato : getConsultaServicios  RequestId :" + requestId);
 			}
-			response.setHeader("X-Request-Id", requestId);
-            return new ResponseEntity<ErrorResponse>(errorDto, HttpStatus.CONFLICT);		
+			headers.add("X-Request-Id", requestId);
+            return new ResponseEntity<ErrorResponse>(errorDto,headers,HttpStatus.CONFLICT);		
 		}
 	
 		LOGGER.info(" End  ConsultaGralServiciosController : getConsultaServicios  RequestId :" + requestId);
-		response.setHeader("X-Request-Id", requestId);
+		
 		return valiServiciosResponse;
 		
 	}
@@ -266,7 +280,6 @@ public class ConsultaCtasController {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		Map<String, String> map = new HashMap<>();
-		map.put("X-Request-IP", ip);
 		map.put("X-Request-Id", requestId);
 		headers.setAll(map);
 		URI uri;
@@ -275,6 +288,7 @@ public class ConsultaCtasController {
 			ContratoRequest contratoRequest = new ContratoRequest();
 			contratoRequest.setClienteHash(consultaDtoRequest.getHash());
 			contratoRequest.setClienteRIF(consultaDtoRequest.getCeduRif());
+			contratoRequest.setIp(ip);
 						HttpEntity<ContratoRequest> httpEntity = new HttpEntity<>(contratoRequest, headers);			
 			ContratoResponse resp = template.postForObject(uri, httpEntity, ContratoResponse.class);			
 			LOGGER.info("End ConsultaCtasController : getValidaContrato  RequestId :" + requestId);
@@ -302,7 +316,6 @@ public class ConsultaCtasController {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		Map<String, String> map = new HashMap<>();
-		map.put("X-Request-IP", ip);
 		map.put("X-Request-Id", requestId);
 		headers.setAll(map);
 		URI uri;
@@ -312,9 +325,10 @@ public class ConsultaCtasController {
 			servicioRequest.setClienteHash(consultaDtoRequest.getHash());
 			servicioRequest.setClienteRIF(consultaDtoRequest.getCeduRif());
 			servicioRequest.setNumeroCuenta(consultaDtoRequest.getNumCuenta());
-			servicioRequest.setServicio(serviName);			
+			servicioRequest.setServicio(serviName);	
+			servicioRequest.setIp(ip);
 			HttpEntity<ServicioRequest> httpEntity = new HttpEntity<>(servicioRequest, headers);			
-			ContratoResponse resp = template.postForObject(uri, httpEntity, ContratoResponse.class);
+			List<ServicioResponse> resp = template.postForObject(uri, httpEntity, List.class);
 			LOGGER.info("End ConsultaCtasController : getValidaServices  RequestId :" + requestId);
 			return flag;			
 		} catch (URISyntaxException e) {
