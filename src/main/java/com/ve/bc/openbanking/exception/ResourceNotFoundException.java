@@ -3,44 +3,41 @@ package com.ve.bc.openbanking.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(value = HttpStatus.NOT_FOUND)
+@ResponseStatus(HttpStatus.NOT_FOUND)
 public class ResourceNotFoundException extends RuntimeException {
+   private static final long serialVersionUID = 1L;
+   private String nombreDelRecurso;
+   private String nombeDelCampo;
+   private long valorDelCampo;
 
-	private static final long serialVersionUID = 1L;
+   public ResourceNotFoundException(String nombreDelRecurso, String nombeDelCampo, long valorDelCampo) {
+      super(String.format("%s No encontrado con  : %s  : '%s'", nombreDelRecurso, nombeDelCampo, valorDelCampo));
+      this.nombreDelRecurso = nombreDelRecurso;
+      this.nombeDelCampo = nombeDelCampo;
+      this.valorDelCampo = valorDelCampo;
+   }
 
-	private String nombreDelRecurso;
-	private String nombeDelCampo;
-	private long valorDelCampo;
+   public String getNombreDelRecurso() {
+      return this.nombreDelRecurso;
+   }
 
-	public ResourceNotFoundException(String nombreDelRecurso, String nombeDelCampo, long valorDelCampo) {
-		super(String.format("%s No encontrado con  : %s  : '%s'", nombreDelRecurso, nombeDelCampo, valorDelCampo));
-		this.nombreDelRecurso = nombreDelRecurso;
-		this.nombeDelCampo = nombeDelCampo;
-		this.valorDelCampo = valorDelCampo;
-	}
+   public void setNombreDelRecurso(String nombreDelRecurso) {
+      this.nombreDelRecurso = nombreDelRecurso;
+   }
 
-	public String getNombreDelRecurso() {
-		return nombreDelRecurso;
-	}
+   public String getNombeDelCampo() {
+      return this.nombeDelCampo;
+   }
 
-	public void setNombreDelRecurso(String nombreDelRecurso) {
-		this.nombreDelRecurso = nombreDelRecurso;
-	}
+   public void setNombeDelCampo(String nombeDelCampo) {
+      this.nombeDelCampo = nombeDelCampo;
+   }
 
-	public String getNombeDelCampo() {
-		return nombeDelCampo;
-	}
+   public long getValorDelCampo() {
+      return this.valorDelCampo;
+   }
 
-	public void setNombeDelCampo(String nombeDelCampo) {
-		this.nombeDelCampo = nombeDelCampo;
-	}
-
-	public long getValorDelCampo() {
-		return valorDelCampo;
-	}
-
-	public void setValorDelCampo(long valorDelCampo) {
-		this.valorDelCampo = valorDelCampo;
-	}
-
+   public void setValorDelCampo(long valorDelCampo) {
+      this.valorDelCampo = valorDelCampo;
+   }
 }

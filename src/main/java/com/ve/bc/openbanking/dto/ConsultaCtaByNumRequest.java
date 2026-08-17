@@ -1,19 +1,20 @@
 package com.ve.bc.openbanking.dto;
 
-public class ConsultaDtoRequest {
-   private String moneda;
-   private String numCuenta;
-   private String ip;
-   private String ceduRif;
-   private String hash;
+import javax.validation.constraints.NotBlank;
 
-   public String getMoneda() {
-      return this.moneda;
-   }
-
-   public String getNumCuenta() {
-      return this.numCuenta;
-   }
+public class ConsultaCtaByNumRequest {
+   private @NotBlank(
+   message = " Es un dato requerido para la solicitd."
+) String ip;
+   private @NotBlank(
+   message = " Es un dato requerido para la solicitd."
+) String ceduRif;
+   private @NotBlank(
+   message = " Es un dato requerido para la solicitd."
+) String hash;
+   private @NotBlank(
+   message = " Es un dato requerido para la solicitd."
+) String numCuenta;
 
    public String getIp() {
       return this.ip;
@@ -27,12 +28,8 @@ public class ConsultaDtoRequest {
       return this.hash;
    }
 
-   public void setMoneda(final String moneda) {
-      this.moneda = moneda;
-   }
-
-   public void setNumCuenta(final String numCuenta) {
-      this.numCuenta = numCuenta;
+   public String getNumCuenta() {
+      return this.numCuenta;
    }
 
    public void setIp(final String ip) {
@@ -47,36 +44,20 @@ public class ConsultaDtoRequest {
       this.hash = hash;
    }
 
+   public void setNumCuenta(final String numCuenta) {
+      this.numCuenta = numCuenta;
+   }
+
    public boolean equals(final Object o) {
       if (o == this) {
          return true;
-      } else if (!(o instanceof ConsultaDtoRequest)) {
+      } else if (!(o instanceof ConsultaCtaByNumRequest)) {
          return false;
       } else {
-         ConsultaDtoRequest other = (ConsultaDtoRequest)o;
+         ConsultaCtaByNumRequest other = (ConsultaCtaByNumRequest)o;
          if (!other.canEqual(this)) {
             return false;
          } else {
-            Object this$moneda = this.getMoneda();
-            Object other$moneda = other.getMoneda();
-            if (this$moneda == null) {
-               if (other$moneda != null) {
-                  return false;
-               }
-            } else if (!this$moneda.equals(other$moneda)) {
-               return false;
-            }
-
-            Object this$numCuenta = this.getNumCuenta();
-            Object other$numCuenta = other.getNumCuenta();
-            if (this$numCuenta == null) {
-               if (other$numCuenta != null) {
-                  return false;
-               }
-            } else if (!this$numCuenta.equals(other$numCuenta)) {
-               return false;
-            }
-
             Object this$ip = this.getIp();
             Object other$ip = other.getIp();
             if (this$ip == null) {
@@ -107,43 +88,40 @@ public class ConsultaDtoRequest {
                return false;
             }
 
+            Object this$numCuenta = this.getNumCuenta();
+            Object other$numCuenta = other.getNumCuenta();
+            if (this$numCuenta == null) {
+               if (other$numCuenta != null) {
+                  return false;
+               }
+            } else if (!this$numCuenta.equals(other$numCuenta)) {
+               return false;
+            }
+
             return true;
          }
       }
    }
 
    protected boolean canEqual(final Object other) {
-      return other instanceof ConsultaDtoRequest;
+      return other instanceof ConsultaCtaByNumRequest;
    }
 
    public int hashCode() {
       int PRIME = 59;
       int result = 1;
-      Object $moneda = this.getMoneda();
-      result = result * 59 + ($moneda == null ? 43 : $moneda.hashCode());
-      Object $numCuenta = this.getNumCuenta();
-      result = result * 59 + ($numCuenta == null ? 43 : $numCuenta.hashCode());
       Object $ip = this.getIp();
       result = result * 59 + ($ip == null ? 43 : $ip.hashCode());
       Object $ceduRif = this.getCeduRif();
       result = result * 59 + ($ceduRif == null ? 43 : $ceduRif.hashCode());
       Object $hash = this.getHash();
       result = result * 59 + ($hash == null ? 43 : $hash.hashCode());
+      Object $numCuenta = this.getNumCuenta();
+      result = result * 59 + ($numCuenta == null ? 43 : $numCuenta.hashCode());
       return result;
    }
 
    public String toString() {
-      return "ConsultaDtoRequest(moneda=" + this.getMoneda() + ", numCuenta=" + this.getNumCuenta() + ", ip=" + this.getIp() + ", ceduRif=" + this.getCeduRif() + ", hash=" + this.getHash() + ")";
-   }
-
-   public ConsultaDtoRequest(final String moneda, final String numCuenta, final String ip, final String ceduRif, final String hash) {
-      this.moneda = moneda;
-      this.numCuenta = numCuenta;
-      this.ip = ip;
-      this.ceduRif = ceduRif;
-      this.hash = hash;
-   }
-
-   public ConsultaDtoRequest() {
+      return "ConsultaCtaByNumRequest(ip=" + this.getIp() + ", ceduRif=" + this.getCeduRif() + ", hash=" + this.getHash() + ", numCuenta=" + this.getNumCuenta() + ")";
    }
 }

@@ -5,9 +5,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class Utils {
-	
-	public String generarCodigoTracerId(){
-        UUID uuid = UUID.randomUUID();
-        return uuid.toString();
-    }
+   public String generarCodigoTracerId() {
+      UUID uuid = UUID.randomUUID();
+      return uuid.toString();
+   }
 }

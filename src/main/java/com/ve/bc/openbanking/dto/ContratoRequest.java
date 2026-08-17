@@ -1,18 +1,20 @@
 package com.ve.bc.openbanking.dto;
 
-public class ServicioRequest {
-   private String ip;
-   private String identificador;
-   private String clienteHash;
-   private String clienteRIF;
-   private String numeroCuenta;
+import javax.validation.constraints.NotBlank;
+
+public class ContratoRequest {
+   private @NotBlank(
+   message = " Es un dato requerido para la solicitd."
+) String ip;
+   private @NotBlank(
+   message = " Es un dato requerido para la solicitd."
+) String clienteHash;
+   private @NotBlank(
+   message = " Es un dato requerido para la solicitd."
+) String clienteRIF;
 
    public String getIp() {
       return this.ip;
-   }
-
-   public String getIdentificador() {
-      return this.identificador;
    }
 
    public String getClienteHash() {
@@ -23,16 +25,8 @@ public class ServicioRequest {
       return this.clienteRIF;
    }
 
-   public String getNumeroCuenta() {
-      return this.numeroCuenta;
-   }
-
    public void setIp(final String ip) {
       this.ip = ip;
-   }
-
-   public void setIdentificador(final String identificador) {
-      this.identificador = identificador;
    }
 
    public void setClienteHash(final String clienteHash) {
@@ -43,17 +37,13 @@ public class ServicioRequest {
       this.clienteRIF = clienteRIF;
    }
 
-   public void setNumeroCuenta(final String numeroCuenta) {
-      this.numeroCuenta = numeroCuenta;
-   }
-
    public boolean equals(final Object o) {
       if (o == this) {
          return true;
-      } else if (!(o instanceof ServicioRequest)) {
+      } else if (!(o instanceof ContratoRequest)) {
          return false;
       } else {
-         ServicioRequest other = (ServicioRequest)o;
+         ContratoRequest other = (ContratoRequest)o;
          if (!other.canEqual(this)) {
             return false;
          } else {
@@ -64,16 +54,6 @@ public class ServicioRequest {
                   return false;
                }
             } else if (!this$ip.equals(other$ip)) {
-               return false;
-            }
-
-            Object this$identificador = this.getIdentificador();
-            Object other$identificador = other.getIdentificador();
-            if (this$identificador == null) {
-               if (other$identificador != null) {
-                  return false;
-               }
-            } else if (!this$identificador.equals(other$identificador)) {
                return false;
             }
 
@@ -97,23 +77,13 @@ public class ServicioRequest {
                return false;
             }
 
-            Object this$numeroCuenta = this.getNumeroCuenta();
-            Object other$numeroCuenta = other.getNumeroCuenta();
-            if (this$numeroCuenta == null) {
-               if (other$numeroCuenta != null) {
-                  return false;
-               }
-            } else if (!this$numeroCuenta.equals(other$numeroCuenta)) {
-               return false;
-            }
-
             return true;
          }
       }
    }
 
    protected boolean canEqual(final Object other) {
-      return other instanceof ServicioRequest;
+      return other instanceof ContratoRequest;
    }
 
    public int hashCode() {
@@ -121,29 +91,23 @@ public class ServicioRequest {
       int result = 1;
       Object $ip = this.getIp();
       result = result * 59 + ($ip == null ? 43 : $ip.hashCode());
-      Object $identificador = this.getIdentificador();
-      result = result * 59 + ($identificador == null ? 43 : $identificador.hashCode());
       Object $clienteHash = this.getClienteHash();
       result = result * 59 + ($clienteHash == null ? 43 : $clienteHash.hashCode());
       Object $clienteRIF = this.getClienteRIF();
       result = result * 59 + ($clienteRIF == null ? 43 : $clienteRIF.hashCode());
-      Object $numeroCuenta = this.getNumeroCuenta();
-      result = result * 59 + ($numeroCuenta == null ? 43 : $numeroCuenta.hashCode());
       return result;
    }
 
    public String toString() {
-      return "ServicioRequest(ip=" + this.getIp() + ", identificador=" + this.getIdentificador() + ", clienteHash=" + this.getClienteHash() + ", clienteRIF=" + this.getClienteRIF() + ", numeroCuenta=" + this.getNumeroCuenta() + ")";
+      return "ContratoRequest(ip=" + this.getIp() + ", clienteHash=" + this.getClienteHash() + ", clienteRIF=" + this.getClienteRIF() + ")";
    }
 
-   public ServicioRequest(final String ip, final String identificador, final String clienteHash, final String clienteRIF, final String numeroCuenta) {
+   public ContratoRequest(final String ip, final String clienteHash, final String clienteRIF) {
       this.ip = ip;
-      this.identificador = identificador;
       this.clienteHash = clienteHash;
       this.clienteRIF = clienteRIF;
-      this.numeroCuenta = numeroCuenta;
    }
 
-   public ServicioRequest() {
+   public ContratoRequest() {
    }
 }
